@@ -1,6 +1,7 @@
 using Scalar.AspNetCore;
 using Service.Application;
 using Service.Infrastructure;
+using Service.Api.Features.Products;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,7 @@ app.MapScalarApiReference();
 
 app.MapGet("/health/live", () => "OK");
 app.MapGet("/health/ready", () => Results.Ok("READY"));
+app.MapCreateProduct();
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 
