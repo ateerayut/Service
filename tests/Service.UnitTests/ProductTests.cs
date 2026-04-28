@@ -24,4 +24,34 @@ public class ProductTests
         Assert.Equal("Mouse", product.Name);
         Assert.Equal(500, product.Price);
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_EmptyName_ThrowsArgumentException(string name)
+    {
+        Assert.Throws<ArgumentException>(() =>
+            Product.Create(name, 100));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Create_NonPositivePrice_ThrowsArgumentOutOfRangeException(decimal price)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Product.Create("Keyboard", price));
+    }
+
+    [Fact]
+    public void Update_InvalidInput_DoesNotChangeProduct()
+    {
+        var product = Product.Create("Keyboard", 1200);
+
+        Assert.Throws<ArgumentException>(() =>
+            product.Update("", 500));
+
+        Assert.Equal("Keyboard", product.Name);
+        Assert.Equal(1200, product.Price);
+    }
 }
