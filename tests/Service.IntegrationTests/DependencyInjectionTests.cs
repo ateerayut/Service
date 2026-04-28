@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Service.Application;
+using Service.Application.Common;
 using Service.Application.Products;
 using Service.Domain.Products;
 using Service.Infrastructure;
@@ -46,8 +47,15 @@ public class DependencyInjectionTests
 
     private sealed class FakeProductRepository : IProductRepository
     {
-        public Task<IReadOnlyList<ProductDto>> List(CancellationToken ct) =>
-            Task.FromResult<IReadOnlyList<ProductDto>>([]);
+        public Task<PagedResult<ProductDto>> List(
+            ListProductsQuery query,
+            CancellationToken ct) =>
+            Task.FromResult(
+                new PagedResult<ProductDto>(
+                    [],
+                    query.Page,
+                    query.PageSize,
+                    TotalItems: 0));
 
         public Task<ProductDto?> GetById(Guid id, CancellationToken ct) =>
             Task.FromResult<ProductDto?>(null);

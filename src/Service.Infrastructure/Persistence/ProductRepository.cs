@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Service.Application.Common;
 using Service.Application.Products;
 using Service.Domain.Products;
 using Service.Infrastructure.Persistence;
@@ -14,16 +15,39 @@ public class ProductRepository : IProductRepository
         _db = db;
     }
 
-    public async Task<IReadOnlyList<ProductDto>> List(CancellationToken ct)
+    public async Task<PagedResult<ProductDto>> List(
+        ListProductsQuery query,
+        CancellationToken ct)
     {
-        return await _db.Products
-            .AsNoTracking()
+        var productsQuery = _db.Products
+            .AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var search = query.Search.Trim();
+
+            productsQuery = productsQuery
+                .Where(product => product.Name.Contains(search));
+        }
+
+        var totalItems = await productsQuery.CountAsync(ct);
+
+        var items = await productsQuery
             .OrderBy(product => product.Name)
+            .ThenBy(product => product.Id)
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
             .Select(product => new ProductDto(
                 product.Id,
                 product.Name,
                 product.Price))
             .ToListAsync(ct);
+
+        return new PagedResult<ProductDto>(
+            items,
+            query.Page,
+            query.PageSize,
+            totalItems);
     }
 
     public async Task<ProductDto?> GetById(Guid id, CancellationToken ct)

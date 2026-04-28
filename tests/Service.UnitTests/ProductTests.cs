@@ -10,6 +10,7 @@ public class ProductTests
         var product = Product.Create("Keyboard", 1200);
 
         Assert.NotEqual(Guid.Empty, product.Id);
+        Assert.Equal('7', product.Id.ToString()[14]);
         Assert.Equal("Keyboard", product.Name);
         Assert.Equal(1200, product.Price);
     }

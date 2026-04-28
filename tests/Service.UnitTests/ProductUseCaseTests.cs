@@ -1,3 +1,4 @@
+using Service.Application.Common;
 using Service.Application.Products;
 using Service.Domain.Products;
 
@@ -40,11 +41,53 @@ public class ProductUseCaseTests
         var repo = new FakeProductRepository();
         repo.Products.Add(Product.Create("Keyboard", 1200));
         repo.Products.Add(Product.Create("Mouse", 500));
-        var useCase = new ListProductsUseCase(repo);
+        var useCase = new ListProductsUseCase(repo, new ListProductsValidator());
 
-        var products = await useCase.Execute(CancellationToken.None);
+        var result = await useCase.Execute(
+            new ListProductsQuery(),
+            CancellationToken.None);
 
-        Assert.Equal(2, products.Count);
+        Assert.Null(result.Validation);
+        Assert.Equal(2, result.Value!.Items.Count);
+        Assert.Equal(1, result.Value.Page);
+        Assert.Equal(20, result.Value.PageSize);
+        Assert.Equal(2, result.Value.TotalItems);
+    }
+
+    [Fact]
+    public async Task ListProductsUseCase_WithSearchAndPaging_ReturnsMatchingPage()
+    {
+        var repo = new FakeProductRepository();
+        repo.Products.Add(Product.Create("Key adapter", 100));
+        repo.Products.Add(Product.Create("Keyboard", 1200));
+        repo.Products.Add(Product.Create("Keycap", 300));
+        repo.Products.Add(Product.Create("Mouse", 500));
+        var useCase = new ListProductsUseCase(repo, new ListProductsValidator());
+
+        var result = await useCase.Execute(
+            new ListProductsQuery(Page: 2, PageSize: 1, Search: "Key"),
+            CancellationToken.None);
+
+        Assert.Null(result.Validation);
+        Assert.Single(result.Value!.Items);
+        Assert.Equal("Keyboard", result.Value.Items[0].Name);
+        Assert.Equal(3, result.Value.TotalItems);
+        Assert.Equal(3, result.Value.TotalPages);
+        Assert.True(result.Value.HasPreviousPage);
+        Assert.True(result.Value.HasNextPage);
+    }
+
+    [Fact]
+    public async Task ListProductsUseCase_InvalidQuery_ReturnsValidationError()
+    {
+        var repo = new FakeProductRepository();
+        var useCase = new ListProductsUseCase(repo, new ListProductsValidator());
+
+        var result = await useCase.Execute(
+            new ListProductsQuery(Page: 0, PageSize: 101),
+            CancellationToken.None);
+
+        Assert.NotNull(result.Validation);
     }
 
     [Fact]
@@ -134,13 +177,34 @@ public class ProductUseCaseTests
     {
         public List<Product> Products { get; } = [];
 
-        public Task<IReadOnlyList<ProductDto>> List(CancellationToken ct)
+        public Task<PagedResult<ProductDto>> List(
+            ListProductsQuery query,
+            CancellationToken ct)
         {
-            IReadOnlyList<ProductDto> products = Products
+            var productsQuery = Products.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(query.Search))
+            {
+                productsQuery = productsQuery
+                    .Where(product => product.Name.Contains(query.Search));
+            }
+
+            var totalItems = productsQuery.Count();
+
+            IReadOnlyList<ProductDto> products = productsQuery
+                .OrderBy(product => product.Name)
+                .ThenBy(product => product.Id)
+                .Skip((query.Page - 1) * query.PageSize)
+                .Take(query.PageSize)
                 .Select(ToDto)
                 .ToList();
 
-            return Task.FromResult(products);
+            return Task.FromResult(
+                new PagedResult<ProductDto>(
+                    products,
+                    query.Page,
+                    query.PageSize,
+                    totalItems));
         }
 
         public Task<ProductDto?> GetById(Guid id, CancellationToken ct)

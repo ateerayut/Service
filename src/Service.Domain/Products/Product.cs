@@ -18,7 +18,7 @@ public class Product
 
         return new Product
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             Name = name,
             Price = price
         };

@@ -8,18 +8,31 @@ public static class ProductEndpoints
         this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/products")
-            .WithTags("Products");
+            .WithTags("Products")
+            .RequireAuthorization();
 
         group.MapGet("/",
             async (
+                int? page,
+                int? pageSize,
+                string? search,
                 ListProductsUseCase uc,
                 CancellationToken ct) =>
             {
-                var products = await uc.Execute(ct);
+                var result = await uc.Execute(
+                    new ListProductsQuery(
+                        page ?? 1,
+                        pageSize ?? 20,
+                        search),
+                    ct);
 
-                return Results.Ok(products.Select(ProductResponse.FromDto));
-            })
-        .AllowAnonymous();
+                return result.Match<IResult>(
+                    products => Results.Ok(
+                        PagedResponse<ProductResponse>.From(
+                            products,
+                            ProductResponse.FromDto)),
+                    validation => Results.ValidationProblem(validation.ToDictionary()));
+            });
 
         group.MapGet("/{id:guid}",
             async (
@@ -32,8 +45,7 @@ public static class ProductEndpoints
                 return product is null
                     ? Results.NotFound()
                     : Results.Ok(ProductResponse.FromDto(product));
-            })
-        .AllowAnonymous();
+            });
 
         group.MapPost("/",
             async (
@@ -48,8 +60,7 @@ public static class ProductEndpoints
                 return result.Match<IResult>(
                     id => Results.Created($"/products/{id}", new CreateProductResponse(id)),
                     validation => Results.ValidationProblem(validation.ToDictionary()));
-            })
-        .AllowAnonymous();
+            });
 
         group.MapPut("/{id:guid}",
             async (
@@ -65,8 +76,7 @@ public static class ProductEndpoints
                 return result.Match<IResult>(
                     updated => updated ? Results.NoContent() : Results.NotFound(),
                     validation => Results.ValidationProblem(validation.ToDictionary()));
-            })
-        .AllowAnonymous();
+            });
 
         group.MapDelete("/{id:guid}",
             async (
@@ -77,8 +87,7 @@ public static class ProductEndpoints
                 var deleted = await uc.Execute(id, ct);
 
                 return deleted ? Results.NoContent() : Results.NotFound();
-            })
-        .AllowAnonymous();
+            });
 
         return app;
     }
