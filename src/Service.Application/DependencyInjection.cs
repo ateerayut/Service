@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Service.Application.Products;
 
@@ -12,8 +12,11 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(
             typeof(DependencyInjection).Assembly);
 
-        // ⭐ IMPORTANT
         services.AddScoped<CreateProductUseCase>();
+        services.AddScoped<ListProductsUseCase>();
+        services.AddScoped<GetProductByIdUseCase>();
+        services.AddScoped<UpdateProductUseCase>();
+        services.AddScoped<DeleteProductUseCase>();
 
         return services;
     }

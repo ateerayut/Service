@@ -2,11 +2,14 @@ using FluentValidation;
 
 namespace Service.Application.Products;
 
-public class CreateProductValidator
-    : AbstractValidator<CreateProductCommand>
+public class UpdateProductValidator
+    : AbstractValidator<UpdateProductCommand>
 {
-    public CreateProductValidator()
+    public UpdateProductValidator()
     {
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
         RuleFor(x => x.Name)
             .NotEmpty()
             .MaximumLength(200);

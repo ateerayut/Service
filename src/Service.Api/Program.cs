@@ -7,37 +7,42 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
-builder.Services
-    .AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
-    {
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters =
-            new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-            {
-                ValidateAudience = false,
-                ValidateIssuer = false,
-                ValidateIssuerSigningKey = false,
-                ValidateLifetime = false
-            };
-    });
+var authAuthority = builder.Configuration["Authentication:Authority"];
+var authAudience = builder.Configuration["Authentication:Audience"];
+var authEnabled = !string.IsNullOrWhiteSpace(authAuthority) &&
+    !string.IsNullOrWhiteSpace(authAudience);
 
-builder.Services.AddAuthorization();
+if (authEnabled)
+{
+    builder.Services
+        .AddAuthentication("Bearer")
+        .AddJwtBearer("Bearer", options =>
+        {
+            options.Authority = authAuthority;
+            options.Audience = authAudience;
+            options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+        });
+
+    builder.Services.AddAuthorization();
+}
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseAuthentication();
-app.UseAuthorization();
+if (authEnabled)
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
 
 app.MapOpenApi();
 app.MapScalarApiReference();
 
 app.MapGet("/health/live", () => "OK");
 app.MapGet("/health/ready", () => Results.Ok("READY"));
-app.MapCreateProduct();
+app.MapProductEndpoints();
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 
