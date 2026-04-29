@@ -20,4 +20,12 @@ public class Customer
             CreateDate = DateTimeOffset.UtcNow
         };
     }
+
+    public void Update(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name is required.", nameof(name));
+
+        Name = name;
+    }
 }

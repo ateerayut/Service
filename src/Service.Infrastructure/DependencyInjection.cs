@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Service.Application.Customers;
+using Service.Application.Orders;
 using Service.Application.Products;
 using Service.Infrastructure.Persistence;
 using Service.Infrastructure.Repositories;
@@ -18,6 +20,8 @@ public static class DependencyInjection
                 config.GetConnectionString("Default")));
 
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
 
         return services;
     }

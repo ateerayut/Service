@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Service.Api.Common;
 using Service.Api.Features.Auth;
+using Service.Api.Features.Customers;
+using Service.Api.Features.Orders;
 using Service.Api.OpenApi;
 using Scalar.AspNetCore;
 using Service.Application;
@@ -100,6 +102,8 @@ app.MapGet("/health/ready", async (
                             });
 app.MapAuthEndpoints();
 app.MapProductEndpoints();
+app.MapCustomerEndpoints();
+app.MapOrderEndpoints();
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 

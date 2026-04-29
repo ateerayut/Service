@@ -1,4 +1,5 @@
 using FluentValidation;
+using Service.Application.Common;
 
 namespace Service.Application.Products;
 

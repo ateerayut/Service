@@ -1,16 +1,16 @@
-using Service.Application.Products;
+using Service.Application.Customers;
 using Service.Application.Common;
 using Service.Api.Common;
 
-namespace Service.Api.Features.Products;
+namespace Service.Api.Features.Customers;
 
-public static class ProductEndpoints
+public static class CustomerEndpoints
 {
-    public static IEndpointRouteBuilder MapProductEndpoints(
+    public static IEndpointRouteBuilder MapCustomerEndpoints(
         this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/products")
-            .WithTags("Products")
+        var group = app.MapGroup("/customers")
+            .WithTags("Customers")
             .RequireAuthorization();
 
         group.MapGet("/",
@@ -18,61 +18,61 @@ public static class ProductEndpoints
                 int? page,
                 int? pageSize,
                 string? search,
-                ListProductsUseCase uc,
+                ListCustomersUseCase uc,
                 CancellationToken ct) =>
             {
                 var result = await uc.Execute(
-                    new ListProductsQuery(
+                    new ListCustomersQuery(
                         page ?? 1,
                         pageSize ?? 20,
                         search),
                     ct);
 
                 return result.Match<IResult>(
-                    products => Results.Ok(
-                        PagedResponse<ProductResponse>.From(
-                            products,
-                            ProductResponse.FromDto)),
+                    customers => Results.Ok(
+                        PagedResponse<CustomerResponse>.From(
+                            customers,
+                            CustomerResponse.FromDto)),
                     validation => Results.ValidationProblem(validation.ToDictionary()));
             });
 
         group.MapGet("/{id:guid}",
             async (
                 Guid id,
-                GetProductByIdUseCase uc,
+                GetCustomerByIdUseCase uc,
                 CancellationToken ct) =>
             {
-                var product = await uc.Execute(id, ct);
+                var customer = await uc.Execute(id, ct);
 
-                return product is null
+                return customer is null
                     ? Results.NotFound()
-                    : Results.Ok(ProductResponse.FromDto(product));
+                    : Results.Ok(CustomerResponse.FromDto(customer));
             });
 
         group.MapPost("/",
             async (
-                CreateProductRequest request,
-                CreateProductUseCase uc,
+                CreateCustomerRequest request,
+                CreateCustomerUseCase uc,
                 CancellationToken ct) =>
             {
                 var result = await uc.Execute(
-                    new CreateProductCommand(request.Name, request.Price),
+                    new CreateCustomerCommand(request.Name),
                     ct);
 
                 return result.Match<IResult>(
-                    id => Results.Created($"/products/{id}", new CreateProductResponse(id)),
+                    id => Results.Created($"/customers/{id}", new CreateCustomerResponse(id)),
                     validation => Results.ValidationProblem(validation.ToDictionary()));
             });
 
         group.MapPut("/{id:guid}",
             async (
                 Guid id,
-                UpdateProductRequest request,
-                UpdateProductUseCase uc,
+                UpdateCustomerRequest request,
+                UpdateCustomerUseCase uc,
                 CancellationToken ct) =>
             {
                 var result = await uc.Execute(
-                    new UpdateProductCommand(id, request.Name, request.Price),
+                    new UpdateCustomerCommand(id, request.Name),
                     ct);
 
                 return result.Match<IResult>(
@@ -83,7 +83,7 @@ public static class ProductEndpoints
         group.MapDelete("/{id:guid}",
             async (
                 Guid id,
-                DeleteProductUseCase uc,
+                DeleteCustomerUseCase uc,
                 CancellationToken ct) =>
             {
                 var deleted = await uc.Execute(id, ct);

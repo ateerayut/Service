@@ -1,89 +1,89 @@
-using Service.Application.Products;
+using Service.Application.Orders;
 using Service.Application.Common;
 using Service.Api.Common;
 
-namespace Service.Api.Features.Products;
+namespace Service.Api.Features.Orders;
 
-public static class ProductEndpoints
+public static class OrderEndpoints
 {
-    public static IEndpointRouteBuilder MapProductEndpoints(
+    public static IEndpointRouteBuilder MapOrderEndpoints(
         this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/products")
-            .WithTags("Products")
+        var group = app.MapGroup("/orders")
+            .WithTags("Orders")
             .RequireAuthorization();
 
         group.MapGet("/",
             async (
                 int? page,
                 int? pageSize,
-                string? search,
-                ListProductsUseCase uc,
+                Guid? customerId,
+                ListOrdersUseCase uc,
                 CancellationToken ct) =>
             {
                 var result = await uc.Execute(
-                    new ListProductsQuery(
+                    new ListOrdersQuery(
                         page ?? 1,
                         pageSize ?? 20,
-                        search),
+                        customerId),
                     ct);
 
                 return result.Match<IResult>(
-                    products => Results.Ok(
-                        PagedResponse<ProductResponse>.From(
-                            products,
-                            ProductResponse.FromDto)),
+                    orders => Results.Ok(
+                        PagedResponse<OrderResponse>.From(
+                            orders,
+                            OrderResponse.FromDto)),
                     validation => Results.ValidationProblem(validation.ToDictionary()));
             });
 
         group.MapGet("/{id:guid}",
             async (
                 Guid id,
-                GetProductByIdUseCase uc,
+                GetOrderByIdUseCase uc,
                 CancellationToken ct) =>
             {
-                var product = await uc.Execute(id, ct);
+                var order = await uc.Execute(id, ct);
 
-                return product is null
+                return order is null
                     ? Results.NotFound()
-                    : Results.Ok(ProductResponse.FromDto(product));
+                    : Results.Ok(OrderResponse.FromDto(order));
             });
 
         group.MapPost("/",
             async (
-                CreateProductRequest request,
-                CreateProductUseCase uc,
+                CreateOrderRequest request,
+                CreateOrderUseCase uc,
                 CancellationToken ct) =>
             {
                 var result = await uc.Execute(
-                    new CreateProductCommand(request.Name, request.Price),
+                    new CreateOrderCommand(request.CustomerId),
                     ct);
 
                 return result.Match<IResult>(
-                    id => Results.Created($"/products/{id}", new CreateProductResponse(id)),
+                    id => Results.Created($"/orders/{id}", new CreateOrderResponse(id)),
                     validation => Results.ValidationProblem(validation.ToDictionary()));
             });
 
-        group.MapPut("/{id:guid}",
+        group.MapPost("/{id:guid}/items",
             async (
                 Guid id,
-                UpdateProductRequest request,
-                UpdateProductUseCase uc,
+                AddOrderItemRequest request,
+                AddOrderItemUseCase uc,
                 CancellationToken ct) =>
             {
                 var result = await uc.Execute(
-                    new UpdateProductCommand(id, request.Name, request.Price),
+                    new AddOrderItemCommand(id, request.ProductId, request.Quantity, request.UnitPrice),
                     ct);
 
                 return result.Match<IResult>(
-                    updated => updated ? Results.NoContent() : Results.NotFound(),
+                    success => success ? Results.NoContent() : Results.NotFound(),
                     validation => Results.ValidationProblem(validation.ToDictionary()));
             });
 
         group.MapDelete("/{id:guid}",
             async (
                 Guid id,
-                DeleteProductUseCase uc,
+                DeleteOrderUseCase uc,
                 CancellationToken ct) =>
             {
                 var deleted = await uc.Execute(id, ct);
