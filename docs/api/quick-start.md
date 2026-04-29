@@ -267,8 +267,8 @@ Get token from authentication endpoint (see project auth documentation).
 ## 📚 Full Documentation
 
 For complete API documentation including all parameters, status codes, and examples, see:
-- `API_CUSTOMER_ORDER_ENDPOINTS.md` - Comprehensive reference
-- `IMPLEMENTATION_SUMMARY.md` - Implementation details
+- `customer-order.md` - Comprehensive reference
+- `implementation-details.md` - Implementation details
 
 ---
 
