@@ -8,7 +8,8 @@ public static class AuthEndpoints
         this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/auth")
-            .WithTags("Auth");
+            .WithTags("Auth")
+            .RequireRateLimiting("fixed");
 
         group.MapPost("/token",
             (

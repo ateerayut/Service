@@ -11,7 +11,8 @@ public static class CustomerEndpoints
     {
         var group = app.MapGroup("/customers")
             .WithTags("Customers")
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .RequireRateLimiting("fixed");
 
         group.MapGet("/",
             async (

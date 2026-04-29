@@ -11,6 +11,8 @@ using Scalar.AspNetCore;
 using Service.Application;
 using Service.Infrastructure;
 using Service.Api.Features.Products;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,10 +65,42 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddFixedWindowLimiter("fixed", opt =>
+    {
+        var rateLimitConfig = builder.Configuration.GetSection("RateLimit");
+        opt.PermitLimit = rateLimitConfig.GetValue<int>("PermitLimit", 100);
+        opt.Window = TimeSpan.FromMinutes(rateLimitConfig.GetValue<int>("WindowMinutes", 1));
+        opt.QueueLimit = rateLimitConfig.GetValue<int>("QueueLimit", 0);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+});
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+// Seed Database
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<Service.Infrastructure.Persistence.AppDbContext>();
+    await Service.Infrastructure.DbInitializer.SeedAsync(context);
+}
 
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseMiddleware<CorrelationIdMiddleware>();
@@ -80,6 +114,9 @@ app.UseSerilogRequestLogging(options =>
             diagnosticContext.Set("CorrelationId", correlationId);
     };
 });
+
+app.UseCors();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

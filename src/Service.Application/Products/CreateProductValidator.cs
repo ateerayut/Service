@@ -9,6 +9,7 @@ public class CreateProductValidator
     {
         RuleFor(x => x.Name)
             .NotEmpty()
+            .MinimumLength(2)
             .MaximumLength(200);
 
         RuleFor(x => x.Price)

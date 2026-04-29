@@ -26,6 +26,9 @@
    - Clean Architecture diagram
    - File structure
    - Data flow examples
+2. [Testing Guide](testing.md)
+   - How to write and run tests
+   - Unit vs Integration tests
 
 ### 🗄️ I Want to Manage Database
 1. [Migration Guide](migrations/start-here.md)
@@ -39,6 +42,7 @@
 ### API Documentation
 - [Quick Start Guide](api/quick-start.md)
 - [Minimal API Guide](api/minimal-api.md)
+- [Security (CORS & Rate Limit)](api/security.md)
 - [Detailed API Reference](api/customer-order.md)
 - [Implementation Details](api/implementation-details.md)
 
@@ -51,6 +55,7 @@
 - [SQL Examples](migrations/sql-examples.md)
 
 ### Implementation Reports
+- [Logging (Serilog Configuration)](implementation/logging.md)
 - [Summary](implementation/summary.md)
 - [Checklist](implementation/checklist.md)
 - [Completion Report](implementation/completion-report.md)

@@ -173,6 +173,53 @@ public class ProductUseCaseTests
         Assert.False(deleted);
     }
 
+    [Fact]
+    public async Task ListProductsUseCase_PageOutOfRange_ReturnsEmptyItems()
+    {
+        var repo = new FakeProductRepository();
+        repo.Products.Add(Product.Create("Keyboard", 1200));
+        var useCase = new ListProductsUseCase(repo, new ListProductsValidator());
+
+        var result = await useCase.Execute(
+            new ListProductsQuery(Page: 10, PageSize: 10),
+            CancellationToken.None);
+
+        Assert.Null(result.Validation);
+        Assert.Empty(result.Value!.Items);
+        Assert.Equal(1, result.Value.TotalItems);
+    }
+
+    [Fact]
+    public async Task ListProductsUseCase_SearchNoMatch_ReturnsEmpty()
+    {
+        var repo = new FakeProductRepository();
+        repo.Products.Add(Product.Create("Keyboard", 1200));
+        var useCase = new ListProductsUseCase(repo, new ListProductsValidator());
+
+        var result = await useCase.Execute(
+            new ListProductsQuery(Search: "NonExistent"),
+            CancellationToken.None);
+
+        Assert.Null(result.Validation);
+        Assert.Empty(result.Value!.Items);
+        Assert.Equal(0, result.Value.TotalItems);
+    }
+
+    [Fact]
+    public async Task GetProductByIdUseCase_Existing_ReturnsProduct()
+    {
+        var repo = new FakeProductRepository();
+        var product = Product.Create("Keyboard", 1200);
+        repo.Products.Add(product);
+        var useCase = new GetProductByIdUseCase(repo);
+
+        var result = await useCase.Execute(product.Id, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(product.Id, result.Id);
+        Assert.Equal("Keyboard", result.Name);
+    }
+
     private sealed class FakeProductRepository : IProductRepository
     {
         public List<Product> Products { get; } = [];

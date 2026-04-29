@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Service.Application;
 using Service.Application.Common;
 using Service.Application.Products;
+using Service.Application.Customers;
+using Service.Application.Orders;
 using Service.Domain.Products;
 using Service.Infrastructure;
 
@@ -28,7 +30,41 @@ public class DependencyInjectionTests
     }
 
     [Fact]
-    public void AddInfrastructure_RegistersProductRepository()
+    public void AddApplication_RegistersCustomerUseCases()
+    {
+        var services = new ServiceCollection();
+
+        services.AddSingleton<ICustomerRepository, FakeCustomerRepository>();
+        services.AddApplication();
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetService<CreateCustomerUseCase>());
+        Assert.NotNull(provider.GetService<ListCustomersUseCase>());
+        Assert.NotNull(provider.GetService<GetCustomerByIdUseCase>());
+        Assert.NotNull(provider.GetService<UpdateCustomerUseCase>());
+        Assert.NotNull(provider.GetService<DeleteCustomerUseCase>());
+    }
+
+    [Fact]
+    public void AddApplication_RegistersOrderUseCases()
+    {
+        var services = new ServiceCollection();
+
+        services.AddSingleton<IOrderRepository, FakeOrderRepository>();
+        services.AddApplication();
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetService<CreateOrderUseCase>());
+        Assert.NotNull(provider.GetService<ListOrdersUseCase>());
+        Assert.NotNull(provider.GetService<GetOrderByIdUseCase>());
+        Assert.NotNull(provider.GetService<AddOrderItemUseCase>());
+        Assert.NotNull(provider.GetService<DeleteOrderUseCase>());
+    }
+
+    [Fact]
+    public void AddInfrastructure_RegistersRepositories()
     {
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
@@ -43,6 +79,8 @@ public class DependencyInjectionTests
         using var provider = services.BuildServiceProvider();
 
         Assert.NotNull(provider.GetService<IProductRepository>());
+        Assert.NotNull(provider.GetService<ICustomerRepository>());
+        Assert.NotNull(provider.GetService<IOrderRepository>());
     }
 
     private sealed class FakeProductRepository : IProductRepository
@@ -71,5 +109,25 @@ public class DependencyInjectionTests
 
         public Task Delete(Product product, CancellationToken ct) =>
             Task.CompletedTask;
+    }
+
+    private sealed class FakeCustomerRepository : ICustomerRepository
+    {
+        public Task<PagedResult<CustomerDto>> List(ListCustomersQuery query, CancellationToken ct) => Task.FromResult(new PagedResult<CustomerDto>([], query.Page, query.PageSize, 0));
+        public Task<CustomerDto?> GetById(Guid id, CancellationToken ct) => Task.FromResult<CustomerDto?>(null);
+        public Task<Service.Domain.Customers.Customer?> GetEntityById(Guid id, CancellationToken ct) => Task.FromResult<Service.Domain.Customers.Customer?>(null);
+        public Task Add(Service.Domain.Customers.Customer customer, CancellationToken ct) => Task.CompletedTask;
+        public Task Update(Service.Domain.Customers.Customer customer, CancellationToken ct) => Task.CompletedTask;
+        public Task Delete(Service.Domain.Customers.Customer customer, CancellationToken ct) => Task.CompletedTask;
+    }
+
+    private sealed class FakeOrderRepository : IOrderRepository
+    {
+        public Task<PagedResult<OrderDto>> List(ListOrdersQuery query, CancellationToken ct) => Task.FromResult(new PagedResult<OrderDto>([], query.Page, query.PageSize, 0));
+        public Task<OrderDto?> GetById(Guid id, CancellationToken ct) => Task.FromResult<OrderDto?>(null);
+        public Task<Service.Domain.Orders.Order?> GetEntityById(Guid id, CancellationToken ct) => Task.FromResult<Service.Domain.Orders.Order?>(null);
+        public Task Add(Service.Domain.Orders.Order order, CancellationToken ct) => Task.CompletedTask;
+        public Task Update(Service.Domain.Orders.Order order, CancellationToken ct) => Task.CompletedTask;
+        public Task Delete(Service.Domain.Orders.Order order, CancellationToken ct) => Task.CompletedTask;
     }
 }
