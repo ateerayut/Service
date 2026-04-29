@@ -38,6 +38,7 @@
 
 ### API Documentation
 - [Quick Start Guide](api/quick-start.md)
+- [Minimal API Guide](api/minimal-api.md)
 - [Detailed API Reference](api/customer-order.md)
 - [Implementation Details](api/implementation-details.md)
 

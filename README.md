@@ -78,6 +78,7 @@ dotnet run --project src/Service.Api
 | หัวข้อ | ลิงก์เอกสาร | คำอธิบาย |
 | :--- | :--- | :--- |
 | **ภาพรวม API** | [docs/api/quick-start.md](docs/api/quick-start.md) | วิธีเรียกใช้ Endpoint ต่างๆ |
+| **Minimal API** | [docs/api/minimal-api.md](docs/api/minimal-api.md) | พื้นฐานและการใช้งาน Minimal API ในโปรเจกต์ |
 | **รายละเอียด API** | [docs/api/customer-order.md](docs/api/customer-order.md) | Spec ของ Customer & Order API |
 | **สถาปัตยกรรม** | [docs/architecture.md](docs/architecture.md) | เจาะลึกการวางโครงสร้าง Clean Architecture |
 | **Database** | [docs/migrations/start-here.md](docs/migrations/start-here.md) | คู่มือการทำ Migration และจัดการ Schema |
