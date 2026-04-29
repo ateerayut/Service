@@ -2,8 +2,13 @@
 
 ## 🎯 Where to Start
 
+### For Newcomers
+👉 **Must Read**: [Zero to Hero: Minimal API Guide](zero-to-hero.md)
+- Learn the basics of .NET Minimal API
+- Understand how this template works in 10 minutes
+
 ### For Everyone
-👉 **Start here**: [README.md](../README.md)
+👉 **Project Entry**: [README.md](../README.md)
 - Project Overview
 - Quick Start
 - Template Guide
@@ -26,7 +31,11 @@
    - Clean Architecture diagram
    - File structure
    - Data flow examples
-2. [Testing Guide](testing.md)
+2. [Deep Dive: Program.cs](architecture/program-cs.md)
+   - Service registration (DI)
+   - Middleware pipeline
+   - Endpoint mapping
+3. [Testing Guide](testing.md)
    - How to write and run tests
    - Unit vs Integration tests
 

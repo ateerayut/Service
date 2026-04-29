@@ -2,6 +2,8 @@
 
 Template นี้เป็น **Master Template** สำหรับเริ่มต้นพัฒนา Microservices หรือ Web API ใหม่ด้วย .NET 10 โดยใช้แนวคิด **Clean Architecture** และ **Minimal API**
 
+> 🆕 **มาใหม่?** เริ่มต้นที่นี่เลย: [**Zero to Hero: คู่มือสำหรับมือใหม่**](docs/zero-to-hero.md)
+
 เป้าหมายของ Template นี้คือเพื่อให้ Jr.Dev หรือทีมพัฒนาสามารถเริ่มโปรเจกต์ใหม่ได้ทันที (Ready-to-use) โดยมีโครงสร้างมาตรฐานที่รองรับการขยายตัว (Scalable) และทดสอบง่าย (Testable)
 
 ---
@@ -79,6 +81,7 @@ dotnet run --project src/Service.Api
 | **Docker** | [docs/infrastructure/docker.md](docs/infrastructure/docker.md) | การรันแอปด้วย Docker และ Seed Data |
 | **รายละเอียด API** | [docs/api/customer-order.md](docs/api/customer-order.md) | Spec ของ Customer & Order API |
 | **สถาปัตยกรรม** | [docs/architecture.md](docs/architecture.md) | เจาะลึกการวางโครงสร้าง Clean Architecture |
+| **Program.cs** | [docs/architecture/program-cs.md](docs/architecture/program-cs.md) | อธิบายโค้ดเริ่มต้นแอปพลิเคชันอย่างละเอียด |
 | **Database** | [docs/migrations/start-here.md](docs/migrations/start-here.md) | คู่มือการทำ Migration และจัดการ Schema |
 | **การติดตั้ง** | [docs/api/implementation-details.md](docs/api/implementation-details.md) | รายละเอียดสิ่งที่ถูกสร้างไว้ใน Template นี้ |
 
