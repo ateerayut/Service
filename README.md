@@ -120,4 +120,98 @@ dotnet test .\Service.slnx
 - **Small Classes**: แยกไฟล์ให้เล็กและตั้งชื่อให้ชัดเจนตามหน้าที่
 
 ---
-*Last Updated: 2026-04-29*
+## Database Migration Script
+
+Template มี helper script สำหรับ EF Core migration ที่ root project:
+
+```powershell
+.\migrate.ps1
+```
+
+ถ้าเครื่องบล็อก PowerShell script เพราะ execution policy ให้ใช้:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\migrate.ps1 -Action list
+```
+
+### List migrations
+
+```powershell
+.\migrate.ps1 -Action list
+```
+
+### Add migration
+
+```powershell
+.\migrate.ps1 -Action add -MigrationName AddCustomersAndOrders
+```
+
+คำสั่งนี้จะสร้าง migration ลงใน:
+
+```text
+src/Service.Infrastructure/Migrations
+```
+
+### Update database
+
+```powershell
+.\migrate.ps1 -Action update
+```
+
+ถ้าต้องการ update ไป migration ที่กำหนด:
+
+```powershell
+.\migrate.ps1 -Action update -ToMigration AddCustomersAndOrders
+```
+
+### Generate SQL script
+
+ใช้สำหรับ generate SQL script ไปให้ DBA หรือใช้ deploy ผ่าน pipeline:
+
+```powershell
+.\migrate.ps1 -Action script
+```
+
+default output:
+
+```text
+artifacts/migrations/migration.sql
+```
+
+กำหนด output เอง:
+
+```powershell
+.\migrate.ps1 -Action script -Output artifacts/migrations/prod.sql
+```
+
+generate script จาก migration หนึ่งไปอีก migration หนึ่ง:
+
+```powershell
+.\migrate.ps1 -Action script -FromMigration 20260326133244_Init -ToMigration 20260428073737_AddCustomersAndOrders -Output artifacts/migrations/add-customers-orders.sql
+```
+
+script ที่ generate เป็นแบบ idempotent ด้วย `--idempotent` จึงเหมาะกับ environment ที่อาจ apply migration ไปแล้วบางส่วน
+
+### Remove last migration
+
+ใช้ลบ migration ล่าสุดที่ยังไม่ต้องการ:
+
+```powershell
+.\migrate.ps1 -Action remove
+```
+
+ควรใช้เฉพาะ migration ที่ยังไม่ได้ deploy หรือยังไม่ได้ share ให้คนอื่นใช้งานแล้ว
+
+### Script internals
+
+script ใช้ project path นี้:
+
+```text
+Infrastructure project: src/Service.Infrastructure
+Startup project:        src/Service.Api
+```
+
+ถ้า rename project จาก template นี้ ให้แก้ path ใน `migrate.ps1` ให้ตรงกับชื่อ project ใหม่
+
+---
+*Last Updated: 2026-05-13*

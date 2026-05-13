@@ -31,9 +31,9 @@ public static class OrderEndpoints
 
                 return result.Match<IResult>(
                     orders => Results.Ok(
-                        PagedResponse<OrderResponse>.From(
-                            orders,
-                            OrderResponse.FromDto)),
+                                        PagedResponse<OrderResponse>.From(
+                                                                        orders,
+                                                                        OrderResponse.FromDto)),
                     validation => Results.ValidationProblem(validation.ToDictionary()));
             });
 
